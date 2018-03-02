@@ -1,0 +1,14 @@
+[Unit]
+Description=A Transparent Filtering Proxy
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/opt/fwdproxyd/fwdproxyd -d
+WorkingDirectory=/etc/fwdproxyd/
+User=fwdproxyd
+Group=fwdproxyd
+
+[Install]
+WantedBy=multi-user.target
+

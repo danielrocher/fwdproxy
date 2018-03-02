@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Written by Daniel Rocher <daniel.rocher@resydev.fr>
+# Copyright (C) 2018
+
+from include import server
+import signal, sys, os, configparser, getopt
+from include.global_env import Global
+
+
+__author__ = "Daniel Rocher <daniel.rocher@resydev.fr>"
+__version__ = Global.version_fwdproxyd
+__date__ = Global.date_fwdproxyd
+__copyright__ = "Copyright (c) 2018 Daniel Rocher"
+__license__ = "GPL Version 3"
+
+
+def signal_handler(signal, frame):
+    Global.debug("Stop fwdproxyd , please wait ...")
+    my_server.stop()
+    sys.exit(0)
+
+
+def daemonize():
+    """daemonize server (run as server)"""
+    try:
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(0)
+    except OSError as e:
+        Global.error("fork failed: {0} ({1})".format(e.errno, e.strerror))
+        sys.exit(1)
+
+
+def validatePort(port):
+    """Return False if TCP port is not valid"""
+    if port < 20 or port > 49151:
+        Global.error("available port : > 20 and < 49152. Use default port.")
+        return False
+    return True
+
+def readConfigFile(config_filename):
+    def getConfigValue(mConfig, section, key, default=""):
+        if mConfig.has_option(section, key):
+            return mConfig.get(section, key)
+        return default
+
+    config = configparser.ConfigParser()
+
+    if not os.path.isfile(config_filename):
+        Global.error("Impossible to read configuration file. Use default settings")
+        return
+
+    config.read(config_filename)
+
+    try:
+        port=int(getConfigValue(config,"Global","port", Global.default_port_server))
+    except:
+        port=Global.port_server
+    if validatePort(port):
+        if Global.current_port_server==Global.default_port_server: # if not changed by command line
+            Global.current_port_server=port
+
+    if not Global.filename_bkl: # if not changed by command line
+        Global.filename_bkl=getConfigValue(config,"Filtering","blacklist_domain_filename")
+
+if __name__ == "__main__":
+    #  intercept the signals (kill)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGQUIT, signal_handler)
+
+    # help message (option --help)
+    usage="\n\tUsage:  {0} -c <filename> -d -m -p <port> -v --help\n\n" \
+        "\t-h| --help :    Show this help\n" \
+        "\t-d :            Daemonize\n" \
+        "\t-c <filename> : Configuration filename\n" \
+        "\t-b <filename> : Domain blacklist file\n" \
+        "\t-p <port> :     TCP port - default = {1}\n" \
+        "\t-v| --version : Show {0} version\n" \
+        "\t-m :            Show debug messages\n\n".format(Global.progname, Global.default_port_server)
+
+    args=sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(args, "hvc:dp:vmb:", ["help", "version"])
+    except getopt.GetoptError as err:
+        print ("\n",err)
+        print (usage)
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            print (usage)
+            sys.exit()
+        if opt in ("-p"):
+            try:
+                port=int(arg)
+            except:
+                port=Global.current_port_server
+            if validatePort(port):
+                Global.current_port_server=port
+        if opt in ("-d"):
+            Global.daemonize=True
+        if opt in ("-b"):
+            Global.filename_bkl=arg
+        if opt in ("-c"):
+            Global.config_filename=arg
+        if opt in ("-m"):
+            Global.debug_fwdproxy=True
+        elif opt in ("-v","--version"):
+            print ("{} - version : {}".format(Global.progname, Global.version_fwdproxyd))
+            sys.exit()
+
+    # read configuration file
+    readConfigFile(Global.config_filename)
+
+    my_server=server.Server(Global.current_port_server, Global.filename_bkl, Global.debug_fwdproxy)
+
+    if Global.daemonize:
+        daemonize()
+
+    # start server
+    my_server.start()
+
+
+
