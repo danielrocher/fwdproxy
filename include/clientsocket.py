@@ -58,10 +58,22 @@ class ClientSocket(threading.Thread):
 
     def getUrl_Host_fromHTTPheader(self, data):
         self.debug("ClientSocket.getUrl_Host_fromHTTPheader()")
-        try:
-            heads = data.decode("ascii").strip().split("\n")
-        except:
-            return None, None
+        def decode(data):
+            try:
+                return data.decode("ascii")
+            except:
+                pass
+            try:
+                return data.decode("latin-1")
+            except:
+                pass
+            try:
+                return data.decode("utf-8")
+            except:
+                return ""
+
+        heads = decode(data).strip().split("\n")
+
         url = None
         hostname = None
         method = None
@@ -76,7 +88,7 @@ class ClientSocket(threading.Thread):
                     hostname = match.group(1)
             if hostname:
                 self.debug("Host : {}, {} {}".format(hostname, method, url))
-            self.debug(heads)
+                self.debug(heads)
         return hostname, url
 
     def connectToPeer(self, p):
@@ -121,6 +133,7 @@ class ClientSocket(threading.Thread):
                     self.peersock.sendDatas(data)
                 except:
                     pass
+
 
     def sendDatas(self, data):
         """Send datas to client"""

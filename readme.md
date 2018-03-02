@@ -7,11 +7,11 @@ _This program is licensed to you under the terms of the GNU General Public Licen
 
 ## Installation
 
-FwdProxy requires : python >= 3.2
+FwdProxy requires : python >= 3.2, Openssl
 
 On Debian/Ubuntu :
 
-    sudo apt-get install python3
+    sudo apt-get install python3 openssl
     cd fwdproxyd
     sudo make install
 
@@ -35,10 +35,10 @@ Edit */etc/fwdproxyd/fwdproxyd.conf* at your convenience. Example :
 
 ## Configure iptables
 
-Forward **http** and **https** traffic to proxy :
+Forward **http** and **https** traffic to proxy (example):
 
-    iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to 8080
-    iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to 8080
+    iptables -t nat -A PREROUTING -s 192.168.58.0/24 -p tcp --dport 80  -j REDIRECT --to 8080
+    iptables -t nat -A PREROUTING -s 192.168.58.0/24 -p tcp --dport 443 -j REDIRECT --to 8080
 
 ## Usage
 

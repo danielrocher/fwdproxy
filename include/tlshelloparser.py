@@ -32,7 +32,7 @@ class TLSHelloParser():
         if contenttype==0x16: # handshake
             versionTLS= self.getInt()
             if versionTLS==0x301:
-                self.debug ("Version TLS : 0x{:04X}".format(versionTLS))
+                # self.debug ("Version TLS : 0x{:04X}".format(versionTLS))
                 length= self.getInt()
                 self.debug ("Lenght {}".format(length))
                 handshaketype= self.getShort()
@@ -45,7 +45,7 @@ class TLSHelloParser():
                     versionTLS=self.getInt()
                     self.tls_version=versionTLS
                     if versionTLS>=0x301:
-                        self.debug ("Version TLS (0x{:04X})".format(versionTLS))
+                        self.debug ("Version TLS : 0x{:04X}".format(versionTLS))
                         # Random 32 bytes
                         self.currindex+=32
                         sessionid_length=self.getShort()
@@ -71,6 +71,19 @@ class TLSHelloParser():
                                 else:
                                     self.getRaw(extension_len)
 
+    def decode(self, data):
+        try:
+            return data.decode("ascii")
+        except:
+            pass
+        try:
+            return data.decode("latin-1")
+        except:
+            pass
+        try:
+            return data.decode("utf-8")
+        except:
+            return None
 
     def parseServerNameIndication(self):
         self.getInt() # server_name_list_len
@@ -79,11 +92,9 @@ class TLSHelloParser():
             server_name_len=self.getInt()
             server_name=self.getRaw(server_name_len)
             if len(server_name)==server_name_len:
-                try:
-                    self.server_name=server_name.decode("utf-8")
-                    self.debug ("Hostname : {}".format(self.server_name))
-                except:
-                    self.server_name=None
+                self.server_name=self.decode(server_name)
+                self.debug ("Hostname : {}".format(self.server_name))
+
 
     def getRaw(self, l):
         r=None

@@ -32,7 +32,7 @@ class Server(object):
 
 
     def isStarted(self):
-        """return True if serveur's running"""
+        """return True if server's running"""
         return self.started
 
 

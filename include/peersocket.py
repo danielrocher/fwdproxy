@@ -60,9 +60,9 @@ class PeerSocket(threading.Thread):
         except:
             self.stop()
             
-        self.eventConnected.set()
         if self.callbackconnected:
             self.callbackconnected() # forward
+        self.eventConnected.set()
 
         while 1:
             if self.eventTerminated.is_set(): break
