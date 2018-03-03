@@ -3,7 +3,7 @@
 # Written by Daniel Rocher <daniel.rocher@resydev.fr>
 # Copyright (C) 2018
 
-from include import server
+from include import server, logs
 import signal, sys, os, configparser, getopt
 from include.global_env import Global
 
@@ -40,9 +40,21 @@ def validatePort(port):
     return True
 
 def readConfigFile(config_filename):
-    def getConfigValue(mConfig, section, key, default=""):
+    def getConfigValue(mConfig, section, key, default="", typ=str):
         if mConfig.has_option(section, key):
-            return mConfig.get(section, key)
+            if typ==str:
+                return mConfig.get(section, key)
+            elif typ==int:
+                try:
+                    return int(mConfig.get(section, key))
+                except:
+                    pass
+            elif typ==bool:
+                try:
+                    return mConfig.getboolean(section, key)
+                except:
+                    pass
+    
         return default
 
     config = configparser.ConfigParser()
@@ -53,10 +65,8 @@ def readConfigFile(config_filename):
 
     config.read(config_filename)
 
-    try:
-        port=int(getConfigValue(config,"Global","port", Global.default_port_server))
-    except:
-        port=Global.port_server
+    port=getConfigValue(config,"Global","port", Global.default_port_server, int)
+
     if validatePort(port):
         if Global.current_port_server==Global.default_port_server: # if not changed by command line
             Global.current_port_server=port
@@ -64,9 +74,17 @@ def readConfigFile(config_filename):
     if not Global.filename_bkl: # if not changed by command line
         Global.filename_bkl=getConfigValue(config,"Filtering","blacklist_domain_filename")
 
-    Global.enable_redirect=getConfigValue(config,"Filtering","enable_redirect", Global.enable_redirect)
+    Global.enable_redirect=getConfigValue(config,"Filtering","enable_redirect", Global.enable_redirect, bool)
     Global.template_file_redirect=getConfigValue(config,"Filtering","template_file_redirect",Global.template_file_redirect)
     Global.url_redirect=getConfigValue(config,"Filtering","url_redirect", Global.url_redirect)
+
+    # Logging
+    Global.syslog=getConfigValue(config,"Logging","syslog", Global.syslog, bool)
+    Global.logfilename=getConfigValue(config,"Logging","logfilename", Global.logfilename)
+    Global.maxbytes=getConfigValue(config,"Logging","maxbytes", Global.maxbytes, int)
+    Global.backupcount=getConfigValue(config,"Logging","backupcount", Global.backupcount, int)
+    Global.logconnect=getConfigValue(config,"Logging","logconnect", Global.logconnect, bool)
+    Global.logblocked=getConfigValue(config,"Logging","logblocked", Global.logblocked, bool)
 
 if __name__ == "__main__":
     #  intercept the signals (kill)
@@ -122,10 +140,16 @@ if __name__ == "__main__":
 
     if Global.enable_redirect: # if enable 302 redirect for blacklisted domain
         my_server.enableRedirectForBlacklistDomain(Global.template_file_redirect, Global.url_redirect)
-        
+
     if Global.daemonize:
         daemonize()
 
+    # Logging
+    logging=logs.Logs(Global.syslog, Global.logfilename, Global.maxbytes, Global.backupcount, Global.logconnect, Global.logblocked)
+    my_server.setCallBackLogConnect(logging.logConnect)
+    my_server.setCallBackLogBlocked(logging.logBlocked)
+    my_server.setCallBackLogServices(logging.logServices)
+    
     # start server
     my_server.start()
 

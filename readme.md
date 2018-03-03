@@ -11,11 +11,11 @@ _This program is licensed to you under the terms of the GNU General Public Licen
  - ability to filter domain names (http/https)
  - no external modules required
  - support http redirection (HTTP/1.1 302)
+ - logging (syslog and/or custom file)
 
 ## Future
 
  - add ipv6 support
- - logging
 
 
 ## Installation
@@ -33,26 +33,42 @@ On Debian/Ubuntu :
 Edit */etc/fwdproxyd/fwdproxyd.conf* at your convenience. Example :
 
     [Global]
-    
     # port number
-    # default port=8080
     port=8080
     
     [Filtering]
     # domain blacklist file
-    blacklist_domain_filename=
+    blacklist_domain_filename=deny_domain.txt
     
     # enable redirection if domain is blocked (HTTP/1.1 302)
     enable_redirect=true
     
     # template file for redirection
-    keywords availables in file template: $redirect$ (url_redirect), $date$, $length$, $domain$
-    # template_file_redirect=templates/redirect.txt
+    # keywords availables in the template: $redirect$ (url_redirect), $date$, $length$, $domain$
+    template_file_redirect=templates/redirect.txt
     
     # url for redirection
     # keyword available : $domain$
     url_redirect=http://www.yourdomainnameexist.com/?blacklisted=$domain$
 
+    [Logging]
+    
+    # enable syslog (/var/log/syslog)
+    syslog=true
+    
+    # Custom logfile
+    # WARNING : fix unix permissions
+    logfilename=/var/log/fwproxyd/fwproxyd.log
+
+    # log rotate
+    maxbytes=150000
+    backupcount=9
+    
+    # log connections
+    logconnect=false
+    
+    # log domain name if is not allowed
+    logblocked=true
 
 
 ## Start service :

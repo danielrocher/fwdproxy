@@ -26,11 +26,23 @@ class Server(object):
         self.bindsocket=0
         self.debug_mode=debug_mode
         self.template_redirect=None
+        self.callbacklogconnect=None
+        self.callbacklogblocked=None
+        self.callbacklogservices=None
 
     def debug(self, msg):
         if self.debug_mode:
             print (msg)
 
+    def setCallBackLogConnect(self, callbacklogconnect):
+        self.callbacklogconnect=callbacklogconnect
+
+    def setCallBackLogBlocked(self, callbacklogblocked):
+        self.callbacklogblocked=callbacklogblocked
+
+    def setCallBackLogServices(self, callbacklogservices):
+        self.callbacklogservices=callbacklogservices
+       
     def enableRedirectForBlacklistDomain(self, template, url):
         if not os.path.isfile(template):
             print("Impossible to read template file")
@@ -78,7 +90,8 @@ class Server(object):
             sys.exit(1)
 
         self.bindsocket.listen(1)
-        self.debug  ("Server is started.")
+        self.debug("Server is started.")
+        self.callbacklogservices("Server is started.")
         self.started=True
 
         while 1:
@@ -89,6 +102,8 @@ class Server(object):
 
             try:
                 client=self.createSocketHandler(newsocket)
+                client.setCallBackLogConnect(self.callbacklogconnect)
+                client.setCallBackLogBlocked(self.callbacklogblocked)
                 client.start()
             except:
                 sys.stderr.write ("Client socket error: {0}, port {1}<->{2}\n".format(fromaddr[0], fromaddr[1], self.port))
@@ -112,7 +127,8 @@ class Server(object):
         except:
             pass
         self.bindsocket=0
-        self.debug  ("Server is stopped.")
+        self.debug("Server is stopped.")
+        self.callbacklogservices("Server is stopped.")
 
 
 if __name__ == "__main__":

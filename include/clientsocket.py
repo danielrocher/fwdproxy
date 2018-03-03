@@ -50,12 +50,20 @@ class ClientSocket(threading.Thread):
         self.eventTerminated = threading.Event()
         self.lockStoppingSocket=threading.Lock()
         self.debug_mode=debug_mode
+        self.callbacklogconnect=None
+        self.callbacklogblocked=None
         self.tlshelloparser=TLSHelloParser(self.debug_mode)
         self.debug ("number of ClientSocket: {}".format(ClientSocket.counter))
 
     def debug(self, msg):
         if self.debug_mode:
             print (msg)
+
+    def setCallBackLogConnect(self, callbacklogconnect):
+        self.callbacklogconnect=callbacklogconnect
+
+    def setCallBackLogBlocked(self, callbacklogblocked):
+        self.callbacklogblocked=callbacklogblocked
 
     def getUrl_Host_fromHTTPheader(self, data):
         self.debug("ClientSocket.getUrl_Host_fromHTTPheader()")
@@ -146,7 +154,8 @@ class ClientSocket(threading.Thread):
             if not self.bkdomain.isDomainAllowed(self.hostname):
                 if self.template_redirect: # if redirect is enabled
                     self.redirect()
-
+                if self.callbacklogblocked:
+                    self.callbacklogblocked(self.srcname, self.hostname)
                 self.debug("Domain is deny : {} !!! -> disconnect".format(self.hostname))
                 self.stop()
                 return
@@ -173,6 +182,8 @@ class ClientSocket(threading.Thread):
 
     def peerConnected(self):
         self.debug("ClientSocket.peerConnected()")
+        if self.callbacklogconnect:
+            self.callbacklogconnect(self.srcname, self.hostname)
         self.eventPeerconnected.set()
 
     def peerDisconnected(self):

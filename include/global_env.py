@@ -21,8 +21,8 @@ class Global(object):
 
 #variables environments
 Global.progname="fwdproxyd"
-Global.version_fwdproxyd="0.7.3"
-Global.date_fwdproxyd="2018-03-01"
+Global.version_fwdproxyd="0.7.4"
+Global.date_fwdproxyd="2018-03-03"
 
 # default value
 Global.config_filename='/etc/fwdproxyd/fwdproxyd.conf'
@@ -31,6 +31,13 @@ Global.default_port_server=8080 # TCP port
 Global.current_port_server=Global.default_port_server
 Global.daemonize=False
 Global.filename_bkl=None # filename of blacklisted domain
+# Logging
+Global.syslog=False
+Global.logfilename=None
+Global.maxbytes=150000
+Global.backupcount=9
+Global.logconnect=False
+Global.logblocked=True
 
 # redirections
 Global.enable_redirect=False
