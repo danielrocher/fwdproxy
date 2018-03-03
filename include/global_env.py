@@ -32,6 +32,10 @@ Global.current_port_server=Global.default_port_server
 Global.daemonize=False
 Global.filename_bkl=None # filename of blacklisted domain
 
+# redirections
+Global.enable_redirect=False
+Global.template_file_redirect=None
+Global.url_redirect=None
 
 if __name__ == "__main__":
     print ("Version of {}: {}\nDate: {}".format(Global.progname, Global.version_fwdproxyd, Global.date_fwdproxyd))

@@ -3,7 +3,7 @@
 # Written by Daniel Rocher <daniel.rocher@resydev.fr>
 # Copyright (C) 2018
 
-import sys, socket
+import sys, os, socket
 try:
     from include.clientsocket import ClientSocket
     from include.blockdomain import *
@@ -25,20 +25,38 @@ class Server(object):
         self.started=False
         self.bindsocket=0
         self.debug_mode=debug_mode
+        self.template_redirect=None
 
     def debug(self, msg):
         if self.debug_mode:
             print (msg)
 
+    def enableRedirectForBlacklistDomain(self, template, url):
+        if not os.path.isfile(template):
+            print("Impossible to read template file")
+            return
+        try:
+            fd=open(template, 'r')
+            tmpl=fd.read(1024)
+            fd.close()
+        except:
+            print("Impossible to read file '{}'".format(template))
+            tmpl=None
+        
+        if tmpl:
+            tmpl=tmpl.replace('$redirect$', url)
+            tmpl=tmpl.replace("\r\n","\n")
+
+        self.template_redirect=tmpl
 
     def isStarted(self):
         """return True if server's running"""
         return self.started
 
 
-    def createSocketHandler(self, ssl_sock, bkdomain):
-        """Reimplement to customize. Return a ClientSocket object"""
-        return ClientSocket(ssl_sock, bkdomain, self.debug_mode)
+    def createSocketHandler(self, ssl_sock):
+        """Return a ClientSocket object"""
+        return ClientSocket(ssl_sock, self.bkdomain, self.template_redirect, self.debug_mode)
 
 
     def start(self):
@@ -49,7 +67,7 @@ class Server(object):
             return # already started
 
 
-        bkdomain=BlockDomain(self.filename_bkl)
+        self.bkdomain=BlockDomain(self.filename_bkl)
 
         self.bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -70,7 +88,7 @@ class Server(object):
             self.debug ("incomingConnection: {0}, port {1}<->{2}".format(fromaddr[0], fromaddr[1], self.port))
 
             try:
-                client=self.createSocketHandler(newsocket, bkdomain)
+                client=self.createSocketHandler(newsocket)
                 client.start()
             except:
                 sys.stderr.write ("Client socket error: {0}, port {1}<->{2}\n".format(fromaddr[0], fromaddr[1], self.port))

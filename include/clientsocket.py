@@ -30,13 +30,14 @@ class ClientSocket(threading.Thread):
     lock=threading.Lock()
     client_collection={}
 
-    def __init__(self, socket, bkdomain, debug_mode=False):
+    def __init__(self, socket, bkdomain, template_redirect=None, debug_mode=False):
         threading.Thread.__init__(self)
         ClientSocket.lock.acquire()
         ClientSocket.counter+=1
         ClientSocket.lock.release()
         self.type=None # http or https
         self.hostname=None
+        self.template_redirect=template_redirect
         self.socket=socket
         try:
             self.srcname=socket.getpeername()
@@ -98,6 +99,29 @@ class ClientSocket(threading.Thread):
         self.peersock.start()
         self.peersock.waitUntilConnected(timeout=10)
 
+    def redirect(self):
+        self.debug("ClientSocket.redirect()")
+        # for http
+        if self.type==Cap.http:
+            from datetime import datetime
+            from babel.dates import format_datetime
+            
+            now = datetime.utcnow()
+            format = 'EEE, dd LLL yyyy hh:mm:ss'
+            date_rfc822="{} GMT".format(format_datetime(now, format, locale='en'))
+            tmpl=self.template_redirect.replace('$date$', date_rfc822)
+            tmpl=tmpl.replace('$domain$', self.hostname)
+            t=tmpl.split("\n\n")
+            if len(t)>1:
+                heads=t[0]
+                content=t[1]
+                heads=heads.replace('$length$', str(len(content)))
+                # replace LF by CRLF (see RFC 2616)
+                heads="\r\n".join([c.replace('\r', '') for c in heads.split('\n')])
+                tmpl=heads+"\r\n"*2+content
+                # send redirection
+                self.sendDatas(tmpl.encode())
+
     def readyReadHandler(self, data):
         self.debug("ClientSocket.readyReadHandler()")
 
@@ -120,6 +144,9 @@ class ClientSocket(threading.Thread):
             return
         else:
             if not self.bkdomain.isDomainAllowed(self.hostname):
+                if self.template_redirect: # if redirect is enabled
+                    self.redirect()
+
                 self.debug("Domain is deny : {} !!! -> disconnect".format(self.hostname))
                 self.stop()
                 return

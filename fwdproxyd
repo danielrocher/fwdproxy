@@ -64,6 +64,10 @@ def readConfigFile(config_filename):
     if not Global.filename_bkl: # if not changed by command line
         Global.filename_bkl=getConfigValue(config,"Filtering","blacklist_domain_filename")
 
+    Global.enable_redirect=getConfigValue(config,"Filtering","enable_redirect", Global.enable_redirect)
+    Global.template_file_redirect=getConfigValue(config,"Filtering","template_file_redirect",Global.template_file_redirect)
+    Global.url_redirect=getConfigValue(config,"Filtering","url_redirect", Global.url_redirect)
+
 if __name__ == "__main__":
     #  intercept the signals (kill)
     signal.signal(signal.SIGINT, signal_handler)
@@ -116,6 +120,9 @@ if __name__ == "__main__":
 
     my_server=server.Server(Global.current_port_server, Global.filename_bkl, Global.debug_fwdproxy)
 
+    if Global.enable_redirect: # if enable 302 redirect for blacklisted domain
+        my_server.enableRedirectForBlacklistDomain(Global.template_file_redirect, Global.url_redirect)
+        
     if Global.daemonize:
         daemonize()
 
