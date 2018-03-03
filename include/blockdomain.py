@@ -9,6 +9,12 @@ class BlockDomain(threading.Thread):
     def __init__(self, filename=None, debug_mode=False):
         self.filename=filename
         self.debug_mode=debug_mode
+        # cache
+        self.decisionDicCache={}
+        self.domainTableCache=[]
+        self.lockcache=threading.Lock()
+        self.limitsizeoftable=800 # size of cache entries
+
         if self.filename:
             self.parseFile()
 
@@ -33,11 +39,37 @@ class BlockDomain(threading.Thread):
             print("Impossible to parse file '{}'".format(self.filename))
 
     def isDomainAllowed(self, domain):
-        for d in BlockDomain.blacklist:
-            if domain.endswith(d):
-                self.debug("Domain is deny : {}".format(domain))
-                return False
-        return True
+        decision=True # default
+        # search in cache
+        if domain in self.domainTableCache:
+            # search decision in cache
+            try:
+                decision=self.decisionDicCache[domain]
+            except:
+                pass
+
+        else: # not in cache
+            for d in BlockDomain.blacklist:
+                if domain.endswith(d):
+                    self.debug("Domain is deny : {}".format(domain))
+                    decision=False
+                    break
+            
+            # update cache
+            self.lockcache.acquire()
+            self.domainTableCache.append(domain)
+            self.decisionDicCache[domain]=decision
+            # purge cache
+            try:
+                if len(self.domainTableCache)>self.limitsizeoftable:
+                    del self.decisionDicCache[self.domainTableCache[0]]
+                    del self.domainTableCache[0] # remove oldest
+            except:
+                print ("error : impossible to purge ! ")
+
+            self.lockcache.release()
+
+        return decision
 
 
 BlockDomain.blacklist=[]
@@ -46,9 +78,10 @@ if __name__ == "__main__":
     def testDomain(domain, bd):
         print ("{} : {}".format(domain, bd.isDomainAllowed(domain)))
 
-    bd=BlockDomain("../deny_domain.txt")
+    bd=BlockDomain("../utests/deny_domain.txt")
     testDomain( "www.test.fr", bd)
     testDomain( "test.fr", bd)
     testDomain( "qwz.fr", bd)
     testDomain( "test.net", bd)
+    testDomain( "fr.test.net", bd)
     testDomain( "fr.test.net", bd)

@@ -6,6 +6,7 @@
 
 import unittest
 from include.tlshelloparser import *
+from include.blockdomain import *
 
 
 def setUpModule():
@@ -46,6 +47,34 @@ class TLSHelloParserTest(unittest.TestCase):
         parser.parseClientHelloHanshake(by)
         self.assertEqual(parser.getTLSVersion(), 0x303)
         self.assertEqual(parser.getHostname(), "www.resydev.fr")
+
+class BlockDomainTest(unittest.TestCase):
+    def setUp(self):
+        self.blockdomain=BlockDomain("./utests/deny_domain.txt")
+
+    def tearDown(self):
+        pass
+
+    def test_blocked_domains(self):
+        self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("test1.net"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.test1.net"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("s.s.test1.net"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("test.fr"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("net.fr"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("test1.net.fr"))
+        # test cache
+        self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
+        self.assertEqual(len(self.blockdomain.domainTableCache), 7)
+        self.assertFalse(self.blockdomain.isDomainAllowed("test.net")) # in cache
+        self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
+        self.assertEqual(len(self.blockdomain.domainTableCache), 7)
+        # test purge
+        self.blockdomain.limitsizeoftable=7
+        self.assertFalse(self.blockdomain.isDomainAllowed("test3.net"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("test4.net"))
+        self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
+        self.assertEqual(len(self.blockdomain.domainTableCache), 7)
 
 
 if __name__ == '__main__':
