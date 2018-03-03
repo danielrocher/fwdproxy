@@ -39,13 +39,13 @@ class Logs(threading.Thread):
     def logConnect(self, ipsrc, domain):
         if self.logconnect:
             self.lock.acquire()
-            self.logger.info("src: {} - domain: {}".format(ipsrc, domain))
+            self.logger.info("CONNECT - src: {} - domain: {}".format(ipsrc, domain))
             self.lock.release()
 
     def logBlocked(self, ipsrc, domain):
         if self.logblocked:
             self.lock.acquire()
-            self.logger.warning("src: {} - domain: {}".format(ipsrc, domain))
+            self.logger.warning("BLOCKED - src: {} - domain: {}".format(ipsrc, domain))
             self.lock.release()
 
     def logServices(self, msg):
@@ -61,3 +61,4 @@ if __name__ == "__main__":
     log.logServices("Is OK !")
     with open(filename, 'r') as fd:
         print(fd.read())
+
