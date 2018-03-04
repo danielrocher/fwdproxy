@@ -91,7 +91,8 @@ class Server(object):
 
         self.bindsocket.listen(1)
         self.debug("Server is started.")
-        self.callbacklogservices("Server is started.")
+        if self.callbacklogservices:
+            self.callbacklogservices("Server is started.")
         self.started=True
 
         while 1:
@@ -102,8 +103,10 @@ class Server(object):
 
             try:
                 client=self.createSocketHandler(newsocket)
-                client.setCallBackLogConnect(self.callbacklogconnect)
-                client.setCallBackLogBlocked(self.callbacklogblocked)
+                if self.setCallBackLogConnect:
+                    client.setCallBackLogConnect(self.callbacklogconnect)
+                if self.setCallBackLogBlocked:
+                    client.setCallBackLogBlocked(self.callbacklogblocked)
                 client.start()
             except:
                 sys.stderr.write ("Client socket error: {0}, port {1}<->{2}\n".format(fromaddr[0], fromaddr[1], self.port))
