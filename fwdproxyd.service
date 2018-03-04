@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 ExecStart=/opt/fwdproxyd/fwdproxyd -d
-WorkingDirectory=/etc/fwdproxyd/
+WorkingDirectory=/opt/fwdproxyd/
 User=fwdproxyd
 Group=fwdproxyd
 
