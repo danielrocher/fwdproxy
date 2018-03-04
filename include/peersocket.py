@@ -59,6 +59,7 @@ class PeerSocket(threading.Thread):
             self.connection.connect(self.peer)
         except:
             self.stop()
+            return
             
         if self.callbackconnected:
             self.callbackconnected() # forward

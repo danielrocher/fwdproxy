@@ -112,11 +112,9 @@ class ClientSocket(threading.Thread):
         # for http
         if self.type==Cap.http:
             from datetime import datetime
-            from babel.dates import format_datetime
             
             now = datetime.utcnow()
-            format = 'EEE, dd LLL yyyy hh:mm:ss'
-            date_rfc822="{} GMT".format(format_datetime(now, format, locale='en'))
+            date_rfc822=now.strftime('%a, %d %b %Y %H:%M:%S GMT')
             tmpl=self.template_redirect.replace('$date$', date_rfc822)
             tmpl=tmpl.replace('$domain$', self.hostname)
             t=tmpl.split("\n\n")
