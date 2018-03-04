@@ -23,7 +23,7 @@ create_user:
 install_program:
 	mkdir -p /opt/fwdproxyd/
 	cp -Pr * /opt/fwdproxyd/
-	chown fwdproxyd:fwdproxyd /opt/fwdproxyd -R
+	chown root:fwdproxyd /opt/fwdproxyd -R
 	chmod o-rwx /opt/fwdproxyd/ -R
 	chmod o+rx /opt
 
