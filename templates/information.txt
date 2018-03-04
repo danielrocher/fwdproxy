@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Date: $date$
+Cache-Control: max-age=0
+Content-Length: $length$
+Content-Type: text/html; charset=iso-8859-1
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>Proxy</title>
+</head><body>
+<h2>This domain is blacklisted : $domain$</h2>
+</body></html>
+
