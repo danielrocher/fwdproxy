@@ -4,10 +4,10 @@
 # Copyright (C) 2018
 
 
-import unittest
+import unittest, os
 from include.tlshelloparser import *
 from include.blockdomain import *
-
+from include.logs import *
 
 def setUpModule():
     pass
@@ -53,7 +53,14 @@ class BlockDomainTest(unittest.TestCase):
         self.blockdomain=BlockDomain("./utests/deny_domain.txt")
 
     def tearDown(self):
-        pass
+        BlockDomain.blacklist=[]
+
+    def test_parseFile(self):
+        print (self.blockdomain.blacklist)
+        self.assertEqual(len(self.blockdomain.blacklist), 12)
+        l= ['net', 'test1.net', 'test2.net', 'test3.net', 'test4.net', 'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net', 'test10.net', 'test11.net']
+        for c in self.blockdomain.blacklist:
+            self.assertTrue(c in l)
 
     def test_blocked_domains(self):
         self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
@@ -76,6 +83,68 @@ class BlockDomainTest(unittest.TestCase):
         self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
         self.assertEqual(len(self.blockdomain.domainTableCache), 7)
 
+
+class LogsTest(unittest.TestCase):
+    def setUp(self):
+        self.filename="./utests/test.log"
+        self.log=Logs(False, self.filename, 10000, 4, True, True)
+    
+    def tearDown(self):
+        try:
+           os.remove(self.filename)
+        except:
+           pass
+
+    def getLinesFromFiles(self):
+        buff=""
+        with open(self.filename, 'r') as fd:
+            buff+=fd.read()
+        return buff
+        
+    def test_logConnect(self):
+        self.log.logConnect('192.168.1.1', 'www.test.fr')
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 2)
+        self.assertTrue('192.168.1.1' in lines)
+        self.assertTrue('www.test.fr' in lines)
+        self.assertTrue('CONNECT' in lines)
+        self.assertTrue('[INFO]' in lines)
+
+    def test_logConnectDisable(self):
+        self.log.logconnect=False
+        self.log.logConnect('192.168.1.2', 'www.test2.fr')
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 1)
+        self.assertFalse('192.168.1.2' in lines)
+        self.assertFalse('www.test2.fr' in lines)
+        self.assertFalse('CONNECT' in lines)
+        self.assertFalse('[INFO]' in lines)
+
+    def test_logBlocked(self):
+        self.log.logBlocked('192.168.1.3', 'www.test3.fr')
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 2)
+        self.assertTrue('192.168.1.3' in lines)
+        self.assertTrue('www.test3.fr' in lines)
+        self.assertTrue('BLOCKED' in lines)
+        self.assertTrue('[WARNING]' in lines)
+
+    def test_logBlockedDisable(self):
+        self.log.logblocked=False
+        self.log.logBlocked('192.168.1.4', 'www.test4.fr')
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 1)
+        self.assertFalse('192.168.1.4' in lines)
+        self.assertFalse('www.test4.fr' in lines)
+        self.assertFalse('BLOCKED' in lines)
+        self.assertFalse('[WARNING]' in lines)
+
+    def test_logServices(self):
+        payload='ABCDEFGHIJK'
+        self.log.logServices(payload)
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 2)
+        self.assertTrue(payload in lines)
 
 if __name__ == '__main__':
     unittest.main()

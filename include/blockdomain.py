@@ -30,10 +30,10 @@ class BlockDomain(threading.Thread):
                     line=line.replace(' ','') # remove spaces
                     line=re.sub('#.*','', line) # remove comments
                     line=re.sub('http.*://','', line)
-                    line=re.sub('/.*','', line) # remove url
+                    line=re.sub('/.*','', line) # remove urn
                     line=re.sub('^\.*','', line) # remove joker
                     line=re.sub('[$*\^\n]', '', line)
-                    if line:
+                    if line and line not in BlockDomain.blacklist:
                         BlockDomain.blacklist.append(line)
         except:
             print("Impossible to parse file '{}'".format(self.filename))
