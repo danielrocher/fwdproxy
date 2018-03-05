@@ -66,9 +66,9 @@ class Server(object):
         return self.started
 
 
-    def createSocketHandler(self, ssl_sock):
+    def createSocketHandler(self, sock):
         """Return a ClientSocket object"""
-        return ClientSocket(ssl_sock, self.bkdomain, self.template_redirect, self.debug_mode)
+        return ClientSocket(sock, self.bkdomain, self.template_redirect, self.debug_mode)
 
 
     def start(self):

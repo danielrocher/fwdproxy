@@ -20,11 +20,11 @@ _This program is licensed to you under the terms of the GNU General Public Licen
 
 ## Installation
 
-FwdProxy requires : python >= 3.2, Openssl
+FwdProxy requires : python >= 3.2
 
 On Debian/Ubuntu :
 
-    sudo apt-get install python3 openssl
+    sudo apt-get install python3
     git clone https://github.com/danielrocher/fwdproxy.git
     cd fwdproxy
     sudo make install
