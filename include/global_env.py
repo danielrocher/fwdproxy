@@ -42,7 +42,7 @@ Global.logblocked=True
 # redirections
 Global.enable_redirect=False
 Global.template_file_redirect=None
-Global.url_redirect=None
+Global.url_redirect=""
 
 if __name__ == "__main__":
     print ("Version of {}: {}\nDate: {}".format(Global.progname, Global.version_fwdproxyd, Global.date_fwdproxyd))

@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     my_server=server.Server(Global.current_port_server, Global.filename_bkl, Global.debug_fwdproxy)
 
-    if Global.enable_redirect: # if enable 302 redirect for blacklisted domain
+    if Global.enable_redirect: # if enable redirect for blacklisted domain
         my_server.enableRedirectForBlacklistDomain(Global.template_file_redirect, Global.url_redirect)
 
     if Global.daemonize:
