@@ -31,7 +31,7 @@ class TLSHelloParser():
         contenttype= self.getShort()
         if contenttype==0x16: # handshake
             versionTLS= self.getInt()
-            if versionTLS==0x301:
+            if versionTLS>=0x301:
                 # self.debug ("Version TLS : 0x{:04X}".format(versionTLS))
                 length= self.getInt()
                 self.debug ("Lenght {}".format(length))

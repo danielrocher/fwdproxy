@@ -40,7 +40,7 @@ class ClientSocket(threading.Thread):
         self.template_redirect=template_redirect
         self.socket=socket
         try:
-            self.srcname=socket.getpeername()
+            self.srcname=socket.getpeername()[0]
         except:
             self.srcname=""
         self.bkdomain=bkdomain
@@ -128,9 +128,24 @@ class ClientSocket(threading.Thread):
                 # send redirection
                 self.sendDatas(tmpl.encode())
 
+    def doForwardIfAllowed(self, data):
+        self.debug("ClientSocket.doForwardIfAllowed()")
+        # if socket is open, and if it's already allowed, just forward (no need to parse)
+        if self.eventForward.is_set() and self.eventPeerconnected.is_set():
+            try:
+                self.peersock.sendDatas(data)
+                return True
+            except:
+                pass
+        return False
+
     def readyReadHandler(self, data):
         self.debug("ClientSocket.readyReadHandler()")
 
+        # if socket is open, and if it's already allowed, just forward (no need to parse)
+        if self.doForwardIfAllowed(data):
+            return
+        
         # test if is HTTP
         if not self.type:
             self.hostname, url=self.getUrl_Host_fromHTTPheader(data)
@@ -159,15 +174,9 @@ class ClientSocket(threading.Thread):
                 return
 
             if not self.eventForward.is_set():
-                # now, enable forwarding
+                # now, connect and enable forwarding
                 self.connectToPeer((self.hostname, Cap.port(self.type)))
-
-            if self.eventPeerconnected.is_set():
-                try:
-                    self.peersock.sendDatas(data)
-                except:
-                    pass
-
+                self.doForwardIfAllowed(data)
 
     def sendDatas(self, data):
         """Send datas to client"""

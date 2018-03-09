@@ -18,7 +18,7 @@ uninstall:
 	userdel -r fwdproxyd
 
 create_user:
-	useradd -r fwdproxyd
+	useradd -r -s /bin/false fwdproxyd
 
 install_program:
 	mkdir -p /opt/fwdproxyd/
