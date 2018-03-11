@@ -7,14 +7,22 @@
 import logging
 import logging.handlers
 import threading
+from datetime import datetime
 
 class Logs(threading.Thread):
     def __init__(self, syslog, logfilename, maxbytes, backupcount, logconnect, logblocked):
+        threading.Thread.__init__(self)
         self.logconnect=logconnect
         self.logblocked=logblocked
         self.logger = logging.getLogger('fwproxyd')
         self.logger.setLevel(logging.DEBUG)
         self.lock=threading.Lock()
+        # cache
+        self.cacheDic={}
+        self.cacheTable=[]
+        self.lockcache=threading.Lock()
+        self.limitsizeoftable=90 # size of cache entries
+        self.wait=2
 
         # if syslog
         if syslog:
@@ -36,17 +44,55 @@ class Logs(threading.Thread):
             except:
                 print('Impossible to write to {} !'.format(logfilename))
 
+    def shouldIprint(self, ipsrc, domain):
+        """limit to one entry/self.wait (in seconds)
+        return True if it's ok to print"""
+        # search in cache
+        current=datetime.timestamp(datetime.now())
+        decision=True # default
+
+        if (ipsrc, domain) in self.cacheTable:
+            try:
+                dt=self.cacheDic[(ipsrc, domain)]
+                if current>dt + self.wait:
+                    self.lockcache.acquire()
+                    self.cacheDic[(ipsrc, domain)]=current
+                    self.lockcache.release()
+                else:
+                    decision=False
+            except:
+                pass
+
+        else: # not in cache
+            # update cache
+            self.lockcache.acquire()
+            self.cacheTable.append((ipsrc, domain))
+            self.cacheDic[(ipsrc, domain)]=current
+            # purge cache
+            try:
+                if len(self.cacheTable)>self.limitsizeoftable:
+                    del self.cacheDic[self.cacheTable[0]]
+                    del self.cacheTable[0] # remove oldest
+            except:
+                print ("error : impossible to purge ! ")
+
+            self.lockcache.release()
+
+        return decision
+
     def logConnect(self, ipsrc, domain):
         if self.logconnect:
-            self.lock.acquire()
-            self.logger.info("CONNECT - src: {} - dst: {}".format(ipsrc, domain))
-            self.lock.release()
+            if self.shouldIprint(ipsrc, domain):
+                self.lock.acquire()
+                self.logger.info("CONNECT - src: {} - dst: {}".format(ipsrc, domain))
+                self.lock.release()
 
     def logBlocked(self, ipsrc, domain):
         if self.logblocked:
-            self.lock.acquire()
-            self.logger.warning("BLOCKED - src: {} - dst: {}".format(ipsrc, domain))
-            self.lock.release()
+            if self.shouldIprint(ipsrc, domain):
+                self.lock.acquire()
+                self.logger.warning("BLOCKED - src: {} - dst: {}".format(ipsrc, domain))
+                self.lock.release()
 
     def logServices(self, msg):
         self.lock.acquire()
@@ -61,4 +107,6 @@ if __name__ == "__main__":
     log.logServices("Is OK !")
     with open(filename, 'r') as fd:
         print(fd.read())
+    import os
+    os.remove(filename)
 

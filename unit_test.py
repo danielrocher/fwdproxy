@@ -4,7 +4,7 @@
 # Copyright (C) 2018
 
 
-import unittest, os
+import unittest, os, time
 from include.tlshelloparser import *
 from include.blockdomain import *
 from include.logs import *
@@ -90,7 +90,16 @@ class BlockDomainTest(unittest.TestCase):
         self.assertFalse(self.blockdomain.isDomainAllowed("test4.net"))
         self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
         self.assertEqual(len(self.blockdomain.domainTableCache), 7)
-
+        self.assertTrue("test4.net" in self.blockdomain.domainTableCache)
+        self.assertTrue("test.fr" in self.blockdomain.domainTableCache)
+        self.assertTrue("www.test1.net" in self.blockdomain.domainTableCache)
+        self.assertFalse("test1.net" in self.blockdomain.domainTableCache)
+        self.assertFalse("test.net" in self.blockdomain.domainTableCache)
+        self.assertTrue("test4.net" in self.blockdomain.decisionDicCache)
+        self.assertTrue("test.fr" in self.blockdomain.decisionDicCache)
+        self.assertTrue("www.test1.net" in self.blockdomain.decisionDicCache)
+        self.assertFalse("test1.net" in self.blockdomain.decisionDicCache)
+        self.assertFalse("test.net" in self.blockdomain.decisionDicCache)
 
 class LogsTest(unittest.TestCase):
     def setUp(self):
@@ -153,6 +162,46 @@ class LogsTest(unittest.TestCase):
         lines=self.getLinesFromFiles()
         self.assertEqual(len(lines.split('\n')), 2)
         self.assertTrue(payload in lines)
+
+    def test_logCache(self):
+        self.log.wait=0.8
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        lines=self.getLinesFromFiles()
+        self.assertEqual(len(lines.split('\n')), 2)
+        self.assertTrue('192.168.1.1' in lines)
+        self.assertTrue('www.test.fr' in lines)
+        self.assertTrue('BLOCKED' in lines)
+        self.assertTrue('[WARNING]' in lines)
+        time.sleep(0.9)
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        lines=self.getLinesFromFiles()
+        lines=lines.split('\n')
+        self.assertEqual(len(lines), 3)
+        self.assertTrue('192.168.1.1' in lines[1])
+        self.assertTrue('www.test.fr' in lines[1])
+        self.assertTrue('BLOCKED' in lines[1])
+        self.assertTrue('[WARNING]' in lines[1])
+        self.assertEqual(len(self.log.cacheDic), 1)
+        self.assertEqual(len(self.log.cacheTable), 1)
+
+    def test_logPurgeCache(self):
+        self.log.wait=0
+        self.log.limitsizeoftable=2
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        self.log.logBlocked('192.168.1.1', 'www.test.fr')
+        self.log.logBlocked('192.168.1.2', 'www.test.fr')
+        self.log.logBlocked('192.168.1.2', 'www.test2.fr')
+        self.assertEqual(len(self.log.cacheDic), 2)
+        self.assertEqual(len(self.log.cacheTable), 2)
+        self.assertTrue(('192.168.1.2', 'www.test2.fr') in self.log.cacheDic)
+        self.assertTrue(('192.168.1.2', 'www.test.fr') in self.log.cacheDic)
+        self.assertFalse(('192.168.1.1', 'www.test.fr') in self.log.cacheDic)
+        self.assertTrue(('192.168.1.2', 'www.test2.fr') in self.log.cacheTable)
+        self.assertTrue(('192.168.1.2', 'www.test.fr') in self.log.cacheTable)
+        self.assertFalse(('192.168.1.1', 'www.test.fr') in self.log.cacheTable)
 
 if __name__ == '__main__':
     unittest.main()

@@ -7,6 +7,7 @@ import threading, re
 
 class BlockDomain(threading.Thread):
     def __init__(self, filename=None, debug_mode=False):
+        threading.Thread.__init__(self)
         self.filename=filename
         self.debug_mode=debug_mode
         # cache
