@@ -68,7 +68,7 @@ def readConfigFile(config_filename):
     port=getConfigValue(config,"Global","port", Global.default_port_server, int)
 
     if validatePort(port):
-        if Global.current_port_server==Global.default_port_server: # if not changed by command line
+        if not Global.current_port_server: # if not changed by command line
             Global.current_port_server=port
 
     if not Global.filename_bkl: # if not changed by command line
@@ -135,6 +135,9 @@ if __name__ == "__main__":
 
     # read configuration file
     readConfigFile(Global.config_filename)
+
+    if not Global.current_port_server:
+        Global.current_port_server=Global.default_port_server
 
     my_server=server.Server(Global.current_port_server, Global.filename_bkl, Global.debug_fwdproxy)
 

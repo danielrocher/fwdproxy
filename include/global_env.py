@@ -28,7 +28,7 @@ Global.date_fwdproxyd="2018-03-03"
 Global.config_filename='/etc/fwdproxyd/fwdproxyd.conf'
 Global.debug_fwdproxy=False # view debug messages
 Global.default_port_server=8080 # TCP port
-Global.current_port_server=Global.default_port_server
+Global.current_port_server=None
 Global.daemonize=False
 Global.filename_bkl=None # filename of blacklisted domain
 # Logging
