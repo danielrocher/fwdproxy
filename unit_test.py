@@ -66,7 +66,7 @@ class BlockDomainTest(unittest.TestCase):
 
     def test_parseFile(self):
         self.assertEqual(len(self.blockdomain.blacklist), 12)
-        l= ['net', 'test1.net', 'test2.net', 'test3.net', 'test4.net', 'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net', 'test10.net', 'test11.net']
+        l= ['.net', 'test1.net', 'test2.net', '.test3.net', 'test4.net', 'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net', 'test10.net', 'test11.net']
         for c in self.blockdomain.blacklist:
             self.assertTrue(c in l)
 

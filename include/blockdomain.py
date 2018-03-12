@@ -32,7 +32,7 @@ class BlockDomain(threading.Thread):
                     line=re.sub('#.*','', line) # remove comments
                     line=re.sub('http.*://','', line)
                     line=re.sub('/.*','', line) # remove urn
-                    line=re.sub('^\.*','', line) # remove joker
+                    line=re.sub('^\.\*','', line) # remove joker
                     line=re.sub('[$*\^\n]', '', line)
                     if line and line not in BlockDomain.blacklist:
                         BlockDomain.blacklist.append(line)
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     def testDomain(domain, bd):
         print ("{} : {}".format(domain, bd.isDomainAllowed(domain)))
 
-    bd=BlockDomain("../utests/deny_domain.txt")
+    bd=BlockDomain("../utests/deny_domain.txt", True)
     testDomain( "www.test.fr", bd)
     testDomain( "test.fr", bd)
     testDomain( "qwz.fr", bd)
