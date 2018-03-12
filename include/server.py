@@ -47,10 +47,11 @@ class Server(object):
         if not template or not os.path.isfile(template):
             print("Impossible to read template file")
             return
+        tmpl=""
         try:
             fd=open(template, 'r')
-            tmpl=fd.read(1024)
-            fd.close()
+            for line in fd:
+                tmpl+=line
         except:
             print("Impossible to read file '{}'".format(template))
             tmpl=None
