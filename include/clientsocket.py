@@ -205,7 +205,7 @@ class ClientSocket(threading.Thread):
         while 1:
             if self.eventTerminated.is_set(): break
             try:
-                data= self.socket.recv(1024)
+                data= self.socket.recv(2048)
             except socket.error:
                 self.debug('socket connection broken')
                 break
