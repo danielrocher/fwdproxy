@@ -78,6 +78,37 @@ class BlockDomainTest(unittest.TestCase):
         self.assertTrue(self.blockdomain.isDomainAllowed("test.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("net.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("test1.net.fr"))
+
+    def test_isDomainAllowed(self):
+        self.blockdomain.decisionDicCache.clear()
+        self.blockdomain.domainTableCache.clear()
+        self.blockdomain.blacklist.clear()
+        self.blockdomain.blacklist.append("net.fr")
+        self.assertTrue(self.blockdomain.isDomainAllowed("test.internet.fr"))
+
+        self.blockdomain.blacklist.append("internet.fr")
+        self.blockdomain.decisionDicCache.clear()
+        self.blockdomain.domainTableCache.clear()
+        self.assertFalse(self.blockdomain.isDomainAllowed("test.internet.fr"))
+
+        self.blockdomain.blacklist.append("forbid.internet2.fr")
+        self.assertTrue(self.blockdomain.isDomainAllowed("internet2.fr"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("allow.internet2.fr"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("forbid.internet2.fr"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("no.forbid.internet2.fr"))
+
+        self.blockdomain.blacklist.append(".net")
+        self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
+
+    def test_cache(self):
+        # filled the cache
+        self.blockdomain.isDomainAllowed("test.net")
+        self.blockdomain.isDomainAllowed("test1.net")
+        self.blockdomain.isDomainAllowed("www.test1.net")
+        self.blockdomain.isDomainAllowed("s.s.test1.net")
+        self.blockdomain.isDomainAllowed("test.fr")
+        self.blockdomain.isDomainAllowed("net.fr")
+        self.blockdomain.isDomainAllowed("test1.net.fr")
         # test cache
         self.assertEqual(len(self.blockdomain.decisionDicCache), 7)
         self.assertEqual(len(self.blockdomain.domainTableCache), 7)
@@ -100,6 +131,7 @@ class BlockDomainTest(unittest.TestCase):
         self.assertTrue("www.test1.net" in self.blockdomain.decisionDicCache)
         self.assertFalse("test1.net" in self.blockdomain.decisionDicCache)
         self.assertFalse("test.net" in self.blockdomain.decisionDicCache)
+
 
 class LogsTest(unittest.TestCase):
     def setUp(self):

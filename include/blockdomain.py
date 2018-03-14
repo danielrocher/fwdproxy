@@ -50,11 +50,19 @@ class BlockDomain(threading.Thread):
                 pass
 
         else: # not in cache
+            dom=[x for x in domain.split('.') if x!='']
             for d in BlockDomain.blacklist:
                 if domain.endswith(d):
-                    self.debug("Domain is deny : {}".format(domain))
-                    decision=False
-                    break
+                    d=[x for x in d.split('.') if x!='']
+                    count=0
+                    for a,b in zip(d[::-1], dom[::-1]):
+                        if a==b:
+                            count+=1
+
+                    if count==len(d):
+                        self.debug("Domain is deny : {}".format(domain))
+                        decision=False
+                        break
             
             # update cache
             self.lockcache.acquire()
@@ -86,3 +94,4 @@ if __name__ == "__main__":
     testDomain( "test.net", bd)
     testDomain( "fr.test.net", bd)
     testDomain( "fr.test.net", bd)
+
