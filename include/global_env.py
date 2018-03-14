@@ -21,8 +21,8 @@ class Global(object):
 
 #variables environments
 Global.progname="fwdproxyd"
-Global.version_fwdproxyd="0.7.4"
-Global.date_fwdproxyd="2018-03-03"
+Global.version_fwdproxyd="0.8.0"
+Global.date_fwdproxyd="2018-03-14"
 
 # default value
 Global.config_filename='/etc/fwdproxyd/fwdproxyd.conf'
