@@ -84,19 +84,28 @@ class Logs(threading.Thread):
         if self.logconnect:
             if self.shouldIprint(ipsrc, domain):
                 self.lock.acquire()
-                self.logger.info("CONNECT - src: {} - dst: {}".format(ipsrc, domain))
+                try:
+                    self.logger.info("CONNECT - src: {} - dst: {}".format(ipsrc, domain))
+                except:
+                    pass
                 self.lock.release()
 
     def logBlocked(self, ipsrc, domain):
         if self.logblocked:
             if self.shouldIprint(ipsrc, domain):
                 self.lock.acquire()
-                self.logger.warning("BLOCKED - src: {} - dst: {}".format(ipsrc, domain))
+                try:
+                    self.logger.warning("BLOCKED - src: {} - dst: {}".format(ipsrc, domain))
+                except:
+                    pass
                 self.lock.release()
 
     def logServices(self, msg):
         self.lock.acquire()
-        self.logger.info(msg)
+        try:
+            self.logger.info(msg)
+        except:
+            pass
         self.lock.release()
 
 if __name__ == "__main__":
