@@ -84,6 +84,12 @@ class Server(object):
 
         self.bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # keepalive
+        # after 60 seconds, start sending keepalives every 20 seconds. Stop connection after 3 failed keepalives
+        self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self.bindsocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60) # start after n secs.
+        self.bindsocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 20) # interval
+        self.bindsocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3) # count
         try:
             self.bindsocket.bind(('', self.port))
         except socket.error:
@@ -120,17 +126,18 @@ class Server(object):
             return # already stopped
         self.started=False
 
+        try:
+            self.bindsocket.close()
+        except:
+            pass
+        self.bindsocket=0
+
         for key in list(ClientSocket.client_collection):
             try:
                 ClientSocket.client_collection[key].stop()
             except:
                 pass
 
-        try:
-            self.bindsocket.close()
-        except:
-            pass
-        self.bindsocket=0
         self.debug("Server is stopped.")
         self.callbacklogservices("Server is stopped.")
 
@@ -138,3 +145,4 @@ class Server(object):
 if __name__ == "__main__":
     server=Server(debug_mode=True)
     server.start()
+

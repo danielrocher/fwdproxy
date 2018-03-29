@@ -53,8 +53,16 @@ class PeerSocket(threading.Thread):
 
     def run(self):
         self.debug("Create new Thread: {}".format(self.getName()))
+        PeerSocket.lock.acquire()
         PeerSocket.peer_collection[self.getName()]=self
+        PeerSocket.lock.release()
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # keepalive
+        # after 60 seconds, start sending keepalives every 20 seconds. Stop connection after 3 failed keepalives
+        self.connection.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60) # start after n secs.
+        self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 20) # interval
+        self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3) # count
         try:
             self.connection.connect(self.peer)
         except:
@@ -97,9 +105,9 @@ class PeerSocket(threading.Thread):
         self.connection.close()
         PeerSocket.lock.acquire()
         PeerSocket.counter-=1
+        del (PeerSocket.peer_collection[self.getName()])
         PeerSocket.lock.release()
         self.debug ("number of PeerSocket: {}".format(PeerSocket.counter))
-        del (PeerSocket.peer_collection[self.getName()])
 
 
 if __name__ == "__main__":

@@ -200,8 +200,9 @@ class ClientSocket(threading.Thread):
 
     def run(self):
         self.debug("Create new Thread: {}".format(self.getName()))
+        ClientSocket.lock.acquire()
         ClientSocket.client_collection[self.getName()]=self
-
+        ClientSocket.lock.release()
         while 1:
             if self.eventTerminated.is_set(): break
             try:
@@ -240,9 +241,9 @@ class ClientSocket(threading.Thread):
 
         ClientSocket.lock.acquire()
         ClientSocket.counter-=1
+        del (ClientSocket.client_collection[self.getName()])
         ClientSocket.lock.release()
         self.debug ("number of ClientSocket: {}".format(ClientSocket.counter))
-        del (ClientSocket.client_collection[self.getName()])
 
 
 if __name__ == "__main__":
