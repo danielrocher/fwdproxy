@@ -22,7 +22,7 @@ class Logs(threading.Thread):
         self.cacheTable=[]
         self.lockcache=threading.Lock()
         self.limitsizeoftable=90 # size of cache entries
-        self.wait=2
+        self.wait=8
 
         # if syslog
         if syslog:
