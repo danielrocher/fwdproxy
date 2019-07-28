@@ -39,7 +39,9 @@ Edit */etc/fwdproxyd/fwdproxyd.conf* at your convenience. Example :
     [Filtering]
     # domain blacklist file
     blacklist_domain_filename=deny_domain.txt
-    
+    # domain whitelist file
+    whitelist_domain_filename=allow_domain.txt
+
     # enable redirection if domain is blocked (HTTP/1.1 302)
     enable_redirect=true
     

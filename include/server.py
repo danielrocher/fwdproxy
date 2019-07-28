@@ -19,9 +19,11 @@ if sys.hexversion < 0x030200F0:
 
 
 class Server(object):
-    def __init__(self, port=8080, filename_bkl=None, debug_mode=False):
+    def __init__(self, port=8080, filename_bkl=None, filename_allw=None, \
+                 debug_mode=False):
         self.port=port
         self.filename_bkl=filename_bkl
+        self.filename_allw=filename_allw
         self.started=False
         self.bindsocket=0
         self.debug_mode=debug_mode
@@ -80,12 +82,13 @@ class Server(object):
             return # already started
 
 
-        self.bkdomain=BlockDomain(self.filename_bkl)
+        self.bkdomain=BlockDomain(self.filename_bkl, self.filename_allw, \
+                                  self.debug_mode)
 
         self.bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        # keepalive
-        # after 60 seconds, start sending keepalives every 20 seconds. Stop connection after 3 failed keepalives
+        # keepalive
+        # after 60 seconds, start sending keepalives every 20 seconds. Stop connection after 3 failed keepalives
         self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.bindsocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60) # start after n secs.
         self.bindsocket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 20) # interval

@@ -31,6 +31,7 @@ Global.default_port_server=8080 # TCP port
 Global.current_port_server=None
 Global.daemonize=False
 Global.filename_bkl=None # filename of blacklisted domain
+Global.filename_allw=None # filename of whitelisted domain
 # Logging
 Global.syslog=False
 Global.logfilename=None

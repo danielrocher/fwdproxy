@@ -74,6 +74,9 @@ def readConfigFile(config_filename):
     if not Global.filename_bkl: # if not changed by command line
         Global.filename_bkl=getConfigValue(config,"Filtering","blacklist_domain_filename")
 
+    if not Global.filename_allw: # if not changed by command line
+        Global.filename_allw=getConfigValue(config,"Filtering","whitelist_domain_filename")
+
     Global.enable_redirect=getConfigValue(config,"Filtering","enable_redirect", Global.enable_redirect, bool)
     Global.template_file_redirect=getConfigValue(config,"Filtering","template_file_redirect",Global.template_file_redirect)
     Global.url_redirect=getConfigValue(config,"Filtering","url_redirect", Global.url_redirect)
@@ -98,13 +101,14 @@ if __name__ == "__main__":
         "\t-d :            Daemonize\n" \
         "\t-c <filename> : Configuration filename\n" \
         "\t-b <filename> : Domain blacklist file\n" \
+        "\t-w <filename> : Domain whitelist file\n" \
         "\t-p <port> :     TCP port - default = {1}\n" \
         "\t-v| --version : Show {0} version\n" \
         "\t-m :            Show debug messages\n\n".format(Global.progname, Global.default_port_server)
 
     args=sys.argv[1:]
     try:
-        opts, args = getopt.getopt(args, "hvc:dp:vmb:", ["help", "version"])
+        opts, args = getopt.getopt(args, "hvc:dp:vmb:w:", ["help", "version"])
     except getopt.GetoptError as err:
         print ("\n",err)
         print (usage)
@@ -125,6 +129,8 @@ if __name__ == "__main__":
             Global.daemonize=True
         if opt in ("-b"):
             Global.filename_bkl=arg
+        if opt in ("-w"):
+            Global.filename_allw=arg
         if opt in ("-c"):
             Global.config_filename=arg
         if opt in ("-m"):
@@ -139,7 +145,8 @@ if __name__ == "__main__":
     if not Global.current_port_server:
         Global.current_port_server=Global.default_port_server
 
-    my_server=server.Server(Global.current_port_server, Global.filename_bkl, Global.debug_fwdproxy)
+    my_server=server.Server(Global.current_port_server, Global.filename_bkl, \
+                            Global.filename_allw, Global.debug_fwdproxy)
 
     if Global.enable_redirect: # if enable redirect for blacklisted domain
         my_server.enableRedirectForBlacklistDomain(Global.template_file_redirect, Global.url_redirect)
