@@ -59,15 +59,23 @@ class TLSHelloParserTest(unittest.TestCase):
 
 class BlockDomainTest(unittest.TestCase):
     def setUp(self):
-        self.blockdomain=BlockDomain("./utests/deny_domain.txt")
+        self.blockdomain=BlockDomain("./utests/deny_domain.txt",\
+                                     "./utests/allow_domain.txt")
 
     def tearDown(self):
         BlockDomain.blacklist=[]
+        BlockDomain.whitelist=[]
 
     def test_parseFile(self):
-        self.assertEqual(len(self.blockdomain.blacklist), 12)
-        l= ['.net', 'test1.net', 'test2.net', '.test3.net', 'test4.net', 'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net', 'test10.net', 'test11.net']
+        self.assertEqual(len(self.blockdomain.blacklist), 15)
+        self.assertEqual(len(self.blockdomain.whitelist), 2)
+        l= ['.net', 'test1.net', 'test2.net', '.test3.net', 'test4.net', \
+            'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net',\
+            'test10.net', 'test11.net', 'gtf.com', 'qwx.com', 'qwx.fr']
         for c in self.blockdomain.blacklist:
+            self.assertTrue(c in l)
+        l= ['abcdef.qwx.fr', 'abcdef.gtf.com']
+        for c in self.blockdomain.whitelist:
             self.assertTrue(c in l)
 
     def test_blocked_domains(self):
@@ -78,6 +86,11 @@ class BlockDomainTest(unittest.TestCase):
         self.assertTrue(self.blockdomain.isDomainAllowed("test.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("net.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("test1.net.fr"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("qwx.fr"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("qwx.fr"))
+        self.assertFalse(self.blockdomain.isDomainAllowed("qwx.com"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("abcdef.qwx.fr"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("abcdef.gtf.com"))
 
     def test_isDomainAllowed(self):
         self.blockdomain.decisionDicCache.clear()
@@ -85,7 +98,6 @@ class BlockDomainTest(unittest.TestCase):
         self.blockdomain.blacklist.clear()
         self.blockdomain.blacklist.append("net.fr")
         self.assertTrue(self.blockdomain.isDomainAllowed("test.internet.fr"))
-
         self.blockdomain.blacklist.append("internet.fr")
         self.blockdomain.decisionDicCache.clear()
         self.blockdomain.domainTableCache.clear()
@@ -96,7 +108,11 @@ class BlockDomainTest(unittest.TestCase):
         self.assertTrue(self.blockdomain.isDomainAllowed("allow.internet2.fr"))
         self.assertFalse(self.blockdomain.isDomainAllowed("forbid.internet2.fr"))
         self.assertFalse(self.blockdomain.isDomainAllowed("no.forbid.internet2.fr"))
-
+        self.blockdomain.decisionDicCache.clear()
+        self.blockdomain.domainTableCache.clear()
+        self.blockdomain.whitelist.append("internet2.fr")
+        self.assertTrue(self.blockdomain.isDomainAllowed("no.forbid.internet2.fr"))
+        self.assertTrue(self.blockdomain.isDomainAllowed("internet2.fr"))
         self.blockdomain.blacklist.append(".net")
         self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
 
@@ -211,11 +227,11 @@ class LogsTest(unittest.TestCase):
         self.log.logBlocked('192.168.1.1', 'www.test.fr')
         lines=self.getLinesFromFiles()
         lines=lines.split('\n')
-        self.assertEqual(len(lines), 3)
-        self.assertTrue('192.168.1.1' in lines[1])
-        self.assertTrue('www.test.fr' in lines[1])
-        self.assertTrue('BLOCKED' in lines[1])
-        self.assertTrue('[WARNING]' in lines[1])
+        self.assertEqual(len(lines), 2)
+        self.assertTrue('192.168.1.1' in lines[0])
+        self.assertTrue('www.test.fr' in lines[0])
+        self.assertTrue('BLOCKED' in lines[0])
+        self.assertTrue('[WARNING]' in lines[0])
         self.assertEqual(len(self.log.cacheDic), 1)
         self.assertEqual(len(self.log.cacheTable), 1)
 
