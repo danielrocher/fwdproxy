@@ -94,6 +94,7 @@ Forward **http** and **https** traffic to proxy (example):
     	-d :            Daemonize
     	-c <filename> : Configuration filename
     	-b <filename> : Domain blacklist file
+    	-w <filename> : Domain whitelist file
     	-p <port> :     TCP port - default = 8080
     	-v| --version : Show fwdproxyd version
     	-m :            Show debug messages
