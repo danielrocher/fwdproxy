@@ -54,7 +54,7 @@ class Logs(threading.Thread):
         if (ipsrc, domain) in self.cacheTable:
             try:
                 dt=self.cacheDic[(ipsrc, domain)]
-                if current>dt + self.wait:
+                if current > (dt + self.wait):
                     self.lockcache.acquire()
                     self.cacheDic[(ipsrc, domain)]=current
                     self.lockcache.release()
@@ -118,4 +118,5 @@ if __name__ == "__main__":
         print(fd.read())
     import os
     os.remove(filename)
+
 

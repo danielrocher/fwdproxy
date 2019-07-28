@@ -222,16 +222,16 @@ class LogsTest(unittest.TestCase):
         self.assertTrue('www.test.fr' in lines)
         self.assertTrue('BLOCKED' in lines)
         self.assertTrue('[WARNING]' in lines)
-        time.sleep(0.9)
+        time.sleep(1.2)
         self.log.logBlocked('192.168.1.1', 'www.test.fr')
         self.log.logBlocked('192.168.1.1', 'www.test.fr')
         lines=self.getLinesFromFiles()
         lines=lines.split('\n')
-        self.assertEqual(len(lines), 2)
-        self.assertTrue('192.168.1.1' in lines[0])
-        self.assertTrue('www.test.fr' in lines[0])
-        self.assertTrue('BLOCKED' in lines[0])
-        self.assertTrue('[WARNING]' in lines[0])
+        self.assertEqual(len(lines), 3)
+        self.assertTrue('192.168.1.1' in lines[1])
+        self.assertTrue('www.test.fr' in lines[1])
+        self.assertTrue('BLOCKED' in lines[1])
+        self.assertTrue('[WARNING]' in lines[1])
         self.assertEqual(len(self.log.cacheDic), 1)
         self.assertEqual(len(self.log.cacheTable), 1)
 
@@ -253,6 +253,7 @@ class LogsTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
