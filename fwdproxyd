@@ -71,6 +71,8 @@ def readConfigFile(config_filename):
         if not Global.current_port_server: # if not changed by command line
             Global.current_port_server=port
 
+    Global.proxy=getConfigValue(config,"Global", "proxy", Global.proxy, str)
+
     if not Global.filename_bkl: # if not changed by command line
         Global.filename_bkl=getConfigValue(config,"Filtering","blacklist_domain_filename")
 
@@ -145,7 +147,7 @@ if __name__ == "__main__":
     if not Global.current_port_server:
         Global.current_port_server=Global.default_port_server
 
-    my_server=server.Server(Global.current_port_server, Global.filename_bkl, \
+    my_server=server.Server(Global.current_port_server, Global.proxy, Global.filename_bkl, \
                             Global.filename_allw, Global.debug_fwdproxy)
 
     if Global.enable_redirect: # if enable redirect for blacklisted domain
