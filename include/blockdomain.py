@@ -5,13 +5,65 @@
 
 import threading, re
 
+
+class Node(object):
+    def __init__(self):
+        self.dic = {}
+
+    def clear(self):
+        self.dic.clear()
+
+    def addDatas(self, data, dic=None):
+        if len(data)==0 or type(data)!=list:
+            return
+        # fist time
+        dic=self.dic if dic==None else dic
+        key=data.pop()
+        if key not in dic:
+            dic[key]={}
+        if len(data)>0:
+            self.addDatas(data, dic[key])
+        else:
+            # finish
+            dic[key][None]=None
+
+    def isInDic(self, data, dic=None, res=False):
+        if len(data)==0 or type(data)!=list:
+            return res
+        dic=self.dic if dic==None else dic
+        key=data.pop()
+        if key not in dic:
+            return res
+        else:
+            res=True if None in dic[key] else False
+        if len(data)>0:
+            res=self.isInDic(data, dic[key], res)
+        return res
+
+class Domain(Node):
+    def __init__(self):
+        super(Domain, self).__init__()
+        self.append=self.addDomain # alias
+
+    def splitSubDomain(self, domain):
+        return [x for x in domain.split('.') if x!='']
+
+    def addDomain(self, domain):
+        self.addDatas(self.splitSubDomain(domain))
+
+    def isSubInDomain(self, sub_domain):
+        return self.isInDic(self.splitSubDomain(sub_domain))
+
+
 class BlockDomain(threading.Thread):
+    blacklist=Domain()
+    whitelist=Domain()
+    # cache
+    decisionDicCache={}
+    domainTableCache=[]
     def __init__(self, filename_deny=None, filename_allow=None, debug_mode=False):
         threading.Thread.__init__(self)
         self.debug_mode=debug_mode
-        # cache
-        self.decisionDicCache={}
-        self.domainTableCache=[]
         self.lockcache=threading.Lock()
         self.limitsizeoftable=800 # size of cache entries
 
@@ -33,35 +85,18 @@ class BlockDomain(threading.Thread):
                     line=line.replace('\\','').strip()
                     line=line.replace(' ','') # remove spaces
                     line=re.sub('#.*','', line) # remove comments
-                    line=re.sub('http.*://','', line)
+                    line=re.sub('https?:\/\/','', line)
                     line=re.sub('/.*','', line) # remove urn
                     line=re.sub('^\.\*','', line) # remove joker
-                    line=re.sub('[$*\^\n]', '', line)
+                    line=re.sub('[$*\^\n]', '', line) # remove regex
                     if line:
-                        if not allow and line not in BlockDomain.blacklist:
-                            BlockDomain.blacklist.append(line)
-                        if allow and line not in BlockDomain.whitelist:
-                            BlockDomain.whitelist.append(line)
+                        if not allow:
+                            self.blacklist.addDomain(line)
+                        else:
+                            self.whitelist.addDomain(line)
         except:
             print("Impossible to parse file '{}'".format(filename))
 
-    def domainIsInclude(self, list_domain, domain):
-        is_include=False
-        dom=[x for x in domain.split('.') if x!='']
-        for d in list_domain:
-            if domain.endswith(d):
-                d_str=d
-                d=[x for x in d.split('.') if x!='']
-                count=0
-                for a,b in zip(d[::-1], dom[::-1]):
-                    if a==b:
-                        count+=1
-
-                if count==len(d):
-                    self.debug("Domain {} is a domain/subdomain of {}".format(domain, d_str))
-                    is_include=True
-                    break
-        return is_include
 
     def isDomainAllowed(self, domain):
         decision=True # default
@@ -74,10 +109,10 @@ class BlockDomain(threading.Thread):
                 pass
 
         else: # not in cache
-            if self.domainIsInclude(BlockDomain.whitelist, domain):
+            if self.whitelist.isSubInDomain(domain):
                 self.debug("Domain access is allowed (whitelist) : {}".format(domain))
                 decision=True
-            elif self.domainIsInclude(BlockDomain.blacklist, domain):
+            elif self.blacklist.isSubInDomain(domain):
                 self.debug("Domain access is denied (blacklist) : {}".format(domain))
                 decision=False
 
@@ -97,9 +132,6 @@ class BlockDomain(threading.Thread):
 
         return decision
 
-
-BlockDomain.blacklist=[]
-BlockDomain.whitelist=[]
 
 if __name__ == "__main__":
     def testDomain(domain, bd):

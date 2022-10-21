@@ -21,7 +21,7 @@ class Global(object):
 
 #variables environments
 Global.progname="fwdproxyd"
-Global.version_fwdproxyd="0.8.0"
+Global.version_fwdproxyd="0.9.0"
 Global.date_fwdproxyd="2018-03-14"
 
 # default value

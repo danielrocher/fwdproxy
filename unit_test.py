@@ -63,20 +63,10 @@ class BlockDomainTest(unittest.TestCase):
                                      "./utests/allow_domain.txt")
 
     def tearDown(self):
-        BlockDomain.blacklist=[]
-        BlockDomain.whitelist=[]
-
-    def test_parseFile(self):
-        self.assertEqual(len(self.blockdomain.blacklist), 15)
-        self.assertEqual(len(self.blockdomain.whitelist), 2)
-        l= ['.net', 'test1.net', 'test2.net', '.test3.net', 'test4.net', \
-            'test5.net', 'www.test6.net', 'www.test7.net', '.com', 'test9.net',\
-            'test10.net', 'test11.net', 'gtf.com', 'qwx.com', 'qwx.fr']
-        for c in self.blockdomain.blacklist:
-            self.assertTrue(c in l)
-        l= ['abcdef.qwx.fr', 'abcdef.gtf.com']
-        for c in self.blockdomain.whitelist:
-            self.assertTrue(c in l)
+        BlockDomain.blacklist.clear()
+        BlockDomain.whitelist.clear()
+        BlockDomain.decisionDicCache.clear()
+        BlockDomain.domainTableCache.clear()
 
     def test_blocked_domains(self):
         self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
