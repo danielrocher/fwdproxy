@@ -20,12 +20,13 @@ if sys.hexversion < 0x030200F0:
 
 class Server(object):
     def __init__(self, port=8080, filename_bkl=None, filename_allw=None, \
-                 debug_mode=False):
+                 filter_policy=0, debug_mode=False):
         self.port=port
         self.filename_bkl=filename_bkl
         self.filename_allw=filename_allw
         self.started=False
         self.bindsocket=0
+        self.filter_policy=filter_policy
         self.debug_mode=debug_mode
         self.template_redirect=None
         self.callbacklogconnect=None
@@ -83,7 +84,7 @@ class Server(object):
 
 
         self.bkdomain=BlockDomain(self.filename_bkl, self.filename_allw, \
-                                  self.debug_mode)
+                                  self.filter_policy, self.debug_mode)
 
         self.bindsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.bindsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

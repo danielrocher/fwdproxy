@@ -63,10 +63,7 @@ class BlockDomainTest(unittest.TestCase):
                                      "./utests/allow_domain.txt")
 
     def tearDown(self):
-        BlockDomain.blacklist.clear()
-        BlockDomain.whitelist.clear()
-        BlockDomain.decisionDicCache.clear()
-        BlockDomain.domainTableCache.clear()
+        self.blockdomain.clear()
 
     def test_blocked_domains(self):
         self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
@@ -138,6 +135,38 @@ class BlockDomainTest(unittest.TestCase):
         self.assertFalse("test1.net" in self.blockdomain.decisionDicCache)
         self.assertFalse("test.net" in self.blockdomain.decisionDicCache)
 
+    def test_filter_policy(self):
+        self.blockdomain.clear()
+        self.blockdomain.filter_policy=0 # whitelist, blacklist, accept
+        self.blockdomain.blacklist.append(".net")
+        self.blockdomain.whitelist.append("internet.net")
+        self.assertTrue(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = accept
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # whitelist > blacklist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in whitelist ; in blacklist
+
+        self.blockdomain.clear()
+        self.blockdomain.filter_policy=1 # blacklist, whitelist, accept
+        self.blockdomain.whitelist.append(".net")
+        self.blockdomain.blacklist.append("internet.net")
+        self.assertTrue(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = accept
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blacklist > whitelist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blacklist ; in whitelist
+
+        self.blockdomain.clear()
+        self.blockdomain.filter_policy=2 # whitelist, blacklist, reject
+        self.blockdomain.blacklist.append(".net")
+        self.blockdomain.whitelist.append("internet.net")
+        self.assertFalse(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = reject
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # whitelist > blacklist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in whitelist ; in blacklist
+
+        self.blockdomain.clear()
+        self.blockdomain.filter_policy=3 # blacklist, whitelist, reject
+        self.blockdomain.whitelist.append(".net")
+        self.blockdomain.blacklist.append("internet.net")
+        self.assertFalse(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = reject
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blacklist > whitelist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blacklist ; in whitelist
 
 class LogsTest(unittest.TestCase):
     def setUp(self):
