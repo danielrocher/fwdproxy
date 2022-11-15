@@ -33,6 +33,7 @@ Global.daemonize=False
 Global.proxy=None
 Global.filename_bkl=None # filename of blacklisted domain
 Global.filename_allw=None # filename of whitelisted domain
+Global.filter_policy=0
 # Logging
 Global.syslog=False
 Global.logfilename=None

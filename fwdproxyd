@@ -79,6 +79,7 @@ def readConfigFile(config_filename):
     if not Global.filename_allw: # if not changed by command line
         Global.filename_allw=getConfigValue(config,"Filtering","whitelist_domain_filename")
 
+    Global.filter_policy=getConfigValue(config,"Filtering","filter_policy", Global.filter_policy, int)
     Global.enable_redirect=getConfigValue(config,"Filtering","enable_redirect", Global.enable_redirect, bool)
     Global.template_file_redirect=getConfigValue(config,"Filtering","template_file_redirect",Global.template_file_redirect)
     Global.url_redirect=getConfigValue(config,"Filtering","url_redirect", Global.url_redirect)
@@ -148,7 +149,7 @@ if __name__ == "__main__":
         Global.current_port_server=Global.default_port_server
 
     my_server=server.Server(Global.current_port_server, Global.proxy, Global.filename_bkl, \
-                            Global.filename_allw, Global.debug_fwdproxy)
+                            Global.filename_allw, Global.filter_policy, Global.debug_fwdproxy)
 
     if Global.enable_redirect: # if enable redirect for blacklisted domain
         my_server.enableRedirectForBlacklistDomain(Global.template_file_redirect, Global.url_redirect)
