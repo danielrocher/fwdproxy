@@ -30,6 +30,7 @@ Global.debug_fwdproxy=False # view debug messages
 Global.default_port_server=8080 # TCP port
 Global.current_port_server=None
 Global.daemonize=False
+Global.proxy=None
 Global.filename_bkl=None # filename of blacklisted domain
 Global.filename_allw=None # filename of whitelisted domain
 Global.filter_policy=0

@@ -30,13 +30,14 @@ class ClientSocket(threading.Thread):
     lock=threading.Lock()
     client_collection={}
 
-    def __init__(self, socket, bkdomain, template_redirect=None, debug_mode=False):
+    def __init__(self, socket, bkdomain, proxy, template_redirect=None, debug_mode=False):
         threading.Thread.__init__(self)
         ClientSocket.lock.acquire()
         ClientSocket.counter+=1
         ClientSocket.lock.release()
         self.type=None # http or https
         self.hostname=None
+        self.proxy=proxy
         self.template_redirect=template_redirect
         self.socket=socket
         try:
@@ -103,7 +104,7 @@ class ClientSocket(threading.Thread):
     def connectToPeer(self, p):
         self.debug("ClientSocket.connectToPeer()")
         self.eventForward.set() # forward is now enabled
-        self.peersock=PeerSocket(p, callbackread=self.sendDatas, callbackconnected=self.peerConnected, callbackdisconnected=self.peerDisconnected, debug_mode=self.debug_mode)
+        self.peersock=PeerSocket(p, self.proxy, callbackread=self.sendDatas, callbackconnected=self.peerConnected, callbackdisconnected=self.peerDisconnected, debug_mode=self.debug_mode)
         self.peersock.start()
         self.peersock.waitUntilConnected(timeout=10)
 

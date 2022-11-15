@@ -19,9 +19,10 @@ if sys.hexversion < 0x030200F0:
 
 
 class Server(object):
-    def __init__(self, port=8080, filename_bkl=None, filename_allw=None, \
+    def __init__(self, port=8080, proxy=None, filename_bkl=None, filename_allw=None, \
                  filter_policy=0, debug_mode=False):
         self.port=port
+        self.proxy=proxy
         self.filename_bkl=filename_bkl
         self.filename_allw=filename_allw
         self.started=False
@@ -72,7 +73,7 @@ class Server(object):
 
     def createSocketHandler(self, sock):
         """Return a ClientSocket object"""
-        return ClientSocket(sock, self.bkdomain, self.template_redirect, self.debug_mode)
+        return ClientSocket(sock, self.bkdomain, self.proxy, self.template_redirect, self.debug_mode)
 
 
     def start(self):
