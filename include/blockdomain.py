@@ -91,19 +91,18 @@ class BlockDomain(threading.Thread):
     def parseFile(self, filename, allow=False):
         try:
             with open(filename, 'r') as fd:
+                m1=re.compile(r'(?:[a-z0-9A-Z\_\-](?:[a-z0-9A-Z\_\-]{0,61}[a-z0-9A-Z\_\-])?\.)+[a-z0-9A-Z\_\-][a-z0-9A-Z\_\-]{0,61}[a-z0-9A-Z]')
                 for line in fd:
-                    line=line.replace('\\','').strip()
-                    line=line.replace(' ','') # remove spaces
-                    line=re.sub('#.*','', line) # remove comments
-                    line=re.sub('https?:\/\/','', line)
-                    line=re.sub('/.*','', line) # remove urn
-                    line=re.sub('^\.\*','', line) # remove joker
-                    line=re.sub('[$*\^\n]', '', line) # remove regex
-                    if line:
-                        if not allow:
-                            self.blacklist.addDomain(line)
-                        else:
-                            self.whitelist.addDomain(line)
+                    r=m1.match(line)
+                    if r:
+                        line=r.group()
+                        if line:
+                            if not allow:
+                                self.blacklist.addDomain(line)
+                            else:
+                                self.whitelist.addDomain(line)
+                    else:
+                        self.debug(f"Ignore domain input (parsing error) : {line.strip()}")
         except:
             print("Impossible to parse file '{}'".format(filename))
 
