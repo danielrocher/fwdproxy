@@ -9,7 +9,7 @@ Content-Type: text/html; charset=iso-8859-1
 <html><head>
 <title>302 Moved Temporarily</title>
 </head><body>
-<h1>This domain is blacklisted : $domain$</h1>
+<h1>This domain is blocked : $domain$</h1>
 <p>See <a href="$redirect$">here</a>.</p>
 </body></html>
 

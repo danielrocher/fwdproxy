@@ -8,6 +8,6 @@ Content-Type: text/html; charset=iso-8859-1
 <html><head>
 <title>Proxy</title>
 </head><body>
-<h2>This domain is blacklisted : $domain$</h2>
+<h2>This domain is blocked : $domain$</h2>
 </body></html>
 

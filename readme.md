@@ -37,17 +37,17 @@ Edit */etc/fwdproxyd/fwdproxyd.conf* at your convenience. Example :
     port=8080
     
     [Filtering]
-    # domain blacklist file
-    blacklist_domain_filename=deny_domain.txt
-    # domain whitelist file
-    whitelist_domain_filename=allow_domain.txt
+    # domain blocklist file
+    blocklist_domain_filename=block_domain.txt
+    # domain allowlist file
+    allowlist_domain_filename=allow_domain.txt
 
     # Filter policy
     # default : filter_policy=0
-    #  0 : whitelist, blacklist, accept
-    #  1 : blacklist, whitelist, accept
-    #  2 : whitelist, blacklist, reject
-    #  3 : blacklist, whitelist, reject
+    #  0 : allowlist, blocklist, accept
+    #  1 : blocklist, allowlist, accept
+    #  2 : allowlist, blocklist, reject
+    #  3 : blocklist, allowlist, reject
     filter_policy=0
 
     # enable redirection if domain is blocked (HTTP/1.1 302)
@@ -59,7 +59,7 @@ Edit */etc/fwdproxyd/fwdproxyd.conf* at your convenience. Example :
     
     # url for redirection
     # keyword available : $domain$
-    url_redirect=http://www.yourdomainnameexist.com/?blacklisted=$domain$
+    url_redirect=http://www.yourdomainnameexist.com/?rejected=$domain$
 
     [Logging]
     
@@ -101,8 +101,8 @@ Forward **http** and **https** traffic to proxy (example):
     	-h| --help :    Show this help
     	-d :            Daemonize
     	-c <filename> : Configuration filename
-    	-b <filename> : Domain blacklist file
-    	-w <filename> : Domain whitelist file
+    	-b <filename> : Domain blocklist file
+    	-w <filename> : Domain allowlist file
     	-p <port> :     TCP port - default = 8080
     	-v| --version : Show fwdproxyd version
     	-m :            Show debug messages

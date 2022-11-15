@@ -56,8 +56,8 @@ class Domain(Node):
 
 
 class BlockDomain(threading.Thread):
-    blacklist=Domain()
-    whitelist=Domain()
+    blocklist=Domain()
+    allowlist=Domain()
     # cache
     decisionDicCache={}
     domainTableCache=[]
@@ -85,8 +85,8 @@ class BlockDomain(threading.Thread):
 
     def clear(self):
         self.clearCache()
-        self.blacklist.clear()
-        self.whitelist.clear()
+        self.blocklist.clear()
+        self.allowlist.clear()
 
     def parseFile(self, filename, allow=False):
         try:
@@ -98,29 +98,29 @@ class BlockDomain(threading.Thread):
                         line=r.group()
                         if line:
                             if not allow:
-                                self.blacklist.addDomain(line)
+                                self.blocklist.addDomain(line)
                             else:
-                                self.whitelist.addDomain(line)
+                                self.allowlist.addDomain(line)
                     else:
                         self.debug(f"Ignore domain input (parsing error) : {line.strip()}")
         except:
             print("Impossible to parse file '{}'".format(filename))
 
 
-    def isInWhiteList(self, domain):
-        if self.whitelist.isSubInDomain(domain):
-            self.debug("Domain access is allowed (whitelist) : {}".format(domain))
+    def isInAllowList(self, domain):
+        if self.allowlist.isSubInDomain(domain):
+            self.debug("Domain access is allowed (allowlist) : {}".format(domain))
             return True, True
         return None, False
 
-    def isInBlackList(self, domain):
-        if self.blacklist.isSubInDomain(domain):
-            self.debug("Domain access is denied (blacklist) : {}".format(domain))
+    def isInBlockList(self, domain):
+        if self.blocklist.isSubInDomain(domain):
+            self.debug("Domain access is denied (blocklist) : {}".format(domain))
             return True, False
         return None, False
 
     def isDomainAllowed(self, domain):
-        decision = True if self.filter_policy in (0,1) else False # default policy (not in blacklist or whitelist)
+        decision = True if self.filter_policy in (0,1) else False # default policy (not in blocklist or allowlist)
         # search in cache
         if domain in self.domainTableCache:
             # search decision in cache
@@ -132,11 +132,11 @@ class BlockDomain(threading.Thread):
         else: # not in cache
             # filter policy
             if self.filter_policy in (0,2) :
-                func1 = self.isInWhiteList
-                func2 = self.isInBlackList
+                func1 = self.isInAllowList
+                func2 = self.isInBlockList
             else:
-                func1 = self.isInBlackList
-                func2 = self.isInWhiteList
+                func1 = self.isInBlockList
+                func2 = self.isInAllowList
             found, res=func1(domain)
             if found: decision=res
             else:
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     def testDomain(domain, bd):
         print ("{} : {}".format(domain, bd.isDomainAllowed(domain)))
 
-    bd=BlockDomain("../utests/deny_domain.txt",\
+    bd=BlockDomain("../utests/block_domain.txt",\
                    "../utests/allow_domain.txt", 0, True)
     testDomain( "www.test.fr", bd)
     testDomain( "test.fr", bd)

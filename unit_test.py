@@ -59,7 +59,7 @@ class TLSHelloParserTest(unittest.TestCase):
 
 class BlockDomainTest(unittest.TestCase):
     def setUp(self):
-        self.blockdomain=BlockDomain("./utests/deny_domain.txt",\
+        self.blockdomain=BlockDomain("./utests/block_domain.txt",\
                                      "./utests/allow_domain.txt")
 
     def tearDown(self):
@@ -82,25 +82,25 @@ class BlockDomainTest(unittest.TestCase):
     def test_isDomainAllowed(self):
         self.blockdomain.decisionDicCache.clear()
         self.blockdomain.domainTableCache.clear()
-        self.blockdomain.blacklist.clear()
-        self.blockdomain.blacklist.append("net.fr")
+        self.blockdomain.blocklist.clear()
+        self.blockdomain.blocklist.append("net.fr")
         self.assertTrue(self.blockdomain.isDomainAllowed("test.internet.fr"))
-        self.blockdomain.blacklist.append("internet.fr")
+        self.blockdomain.blocklist.append("internet.fr")
         self.blockdomain.decisionDicCache.clear()
         self.blockdomain.domainTableCache.clear()
         self.assertFalse(self.blockdomain.isDomainAllowed("test.internet.fr"))
 
-        self.blockdomain.blacklist.append("forbid.internet2.fr")
+        self.blockdomain.blocklist.append("forbid.internet2.fr")
         self.assertTrue(self.blockdomain.isDomainAllowed("internet2.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("allow.internet2.fr"))
         self.assertFalse(self.blockdomain.isDomainAllowed("forbid.internet2.fr"))
         self.assertFalse(self.blockdomain.isDomainAllowed("no.forbid.internet2.fr"))
         self.blockdomain.decisionDicCache.clear()
         self.blockdomain.domainTableCache.clear()
-        self.blockdomain.whitelist.append("internet2.fr")
+        self.blockdomain.allowlist.append("internet2.fr")
         self.assertTrue(self.blockdomain.isDomainAllowed("no.forbid.internet2.fr"))
         self.assertTrue(self.blockdomain.isDomainAllowed("internet2.fr"))
-        self.blockdomain.blacklist.append(".net")
+        self.blockdomain.blocklist.append(".net")
         self.assertFalse(self.blockdomain.isDomainAllowed("test.net"))
 
     def test_cache(self):
@@ -137,36 +137,36 @@ class BlockDomainTest(unittest.TestCase):
 
     def test_filter_policy(self):
         self.blockdomain.clear()
-        self.blockdomain.filter_policy=0 # whitelist, blacklist, accept
-        self.blockdomain.blacklist.append(".net")
-        self.blockdomain.whitelist.append("internet.net")
+        self.blockdomain.filter_policy=0 # allowlist, blocklist, accept
+        self.blockdomain.blocklist.append(".net")
+        self.blockdomain.allowlist.append("internet.net")
         self.assertTrue(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = accept
-        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # whitelist > blacklist
-        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in whitelist ; in blacklist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # allowlist > blocklist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in allowlist ; in blocklist
 
         self.blockdomain.clear()
-        self.blockdomain.filter_policy=1 # blacklist, whitelist, accept
-        self.blockdomain.whitelist.append(".net")
-        self.blockdomain.blacklist.append("internet.net")
+        self.blockdomain.filter_policy=1 # blocklist, allowlist, accept
+        self.blockdomain.allowlist.append(".net")
+        self.blockdomain.blocklist.append("internet.net")
         self.assertTrue(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = accept
-        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blacklist > whitelist
-        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blacklist ; in whitelist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blocklist > allowlist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blocklist ; in allowlist
 
         self.blockdomain.clear()
-        self.blockdomain.filter_policy=2 # whitelist, blacklist, reject
-        self.blockdomain.blacklist.append(".net")
-        self.blockdomain.whitelist.append("internet.net")
+        self.blockdomain.filter_policy=2 # allowlist, blocklist, reject
+        self.blockdomain.blocklist.append(".net")
+        self.blockdomain.allowlist.append("internet.net")
         self.assertFalse(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = reject
-        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # whitelist > blacklist
-        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in whitelist ; in blacklist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.internet.net")) # allowlist > blocklist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in allowlist ; in blocklist
 
         self.blockdomain.clear()
-        self.blockdomain.filter_policy=3 # blacklist, whitelist, reject
-        self.blockdomain.whitelist.append(".net")
-        self.blockdomain.blacklist.append("internet.net")
+        self.blockdomain.filter_policy=3 # blocklist, allowlist, reject
+        self.blockdomain.allowlist.append(".net")
+        self.blockdomain.blocklist.append("internet.net")
         self.assertFalse(self.blockdomain.isDomainAllowed("internet.fr")) # not in lists, default policy = reject
-        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blacklist > whitelist
-        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blacklist ; in whitelist
+        self.assertFalse(self.blockdomain.isDomainAllowed("www.internet.net")) # blocklist > allowlist
+        self.assertTrue(self.blockdomain.isDomainAllowed("www.resydev.net")) # not in blocklist ; in allowlist
 
 class LogsTest(unittest.TestCase):
     def setUp(self):

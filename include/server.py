@@ -47,7 +47,7 @@ class Server(object):
     def setCallBackLogServices(self, callbacklogservices):
         self.callbacklogservices=callbacklogservices
        
-    def enableRedirectForBlacklistDomain(self, template, url):
+    def enableRedirectForBlockListDomain(self, template, url):
         if not template or not os.path.isfile(template):
             print("Impossible to read template file")
             return
