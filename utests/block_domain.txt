@@ -2,13 +2,13 @@
 test1.net
 # comment
 test2.net    # other comment
-\.test3.net
-test4.net/withurl
-test5.net/withotherurl?refer=http://refer.net
-http://www.test6.net
-https://www.test7.net
-.*\.com
-^test9.net*$
+.test3.net
+test4.net
+test5.net
+www.test6.net
+www.test7.net
+.com
+test9.net
                                   test10.net                      #
 test11.net
 test11.net

@@ -91,11 +91,11 @@ class BlockDomain(threading.Thread):
     def parseFile(self, filename, allow=False):
         try:
             with open(filename, 'r') as fd:
-                m1=re.compile(r'(?:[a-z0-9A-Z\_\-](?:[a-z0-9A-Z\_\-]{0,61}[a-z0-9A-Z\_\-])?\.)+[a-z0-9A-Z\_\-][a-z0-9A-Z\_\-]{0,61}[a-z0-9A-Z]')
+                m1=re.compile(r'[\t\s]*([a-z0-9A-Z\-\_\.]{0,70}\.[a-z0-9A-Z]{2,25})')
                 for line in fd:
                     r=m1.match(line)
-                    if r:
-                        line=r.group()
+                    if r :
+                        line=r.group(1)
                         if line:
                             if not allow:
                                 self.blocklist.addDomain(line)
