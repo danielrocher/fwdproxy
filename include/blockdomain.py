@@ -25,7 +25,7 @@ class Node(object):
             self.addDatas(data, dic[key])
         else:
             # finish
-            dic[key][None]=None
+            dic[key]={None : None}
 
     def isInDic(self, data, dic=None, res=False):
         if len(data)==0 or type(data)!=list:
