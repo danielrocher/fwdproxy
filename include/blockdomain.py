@@ -21,7 +21,7 @@ class Node(object):
         key=data.pop()
         if key not in dic:
             dic[key]={}
-        if len(data)>0:
+        if len(data)>0 and None not in dic[key]:
             self.addDatas(data, dic[key])
         else:
             # finish
@@ -34,8 +34,8 @@ class Node(object):
         key=data.pop()
         if key not in dic:
             return res
-        else:
-            res=True if None in dic[key] else False
+        if None in dic[key]:
+            return True
         if len(data)>0:
             res=self.isInDic(data, dic[key], res)
         return res
