@@ -100,6 +100,7 @@ class TLSHelloParser():
         r=None
         try:
             r=self.raw[self.currindex:self.currindex+l]
+            if len(r)<l: return None
         except:
             pass
         self.incCurrentindex(l)
