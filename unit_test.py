@@ -23,27 +23,24 @@ class TLSHelloParserTest(unittest.TestCase):
         pass
 
     def test_getShort(self):
-        by = b'\x00\x01\x02'
         parser=TLSHelloParser()
-        parser.raw=by
+        parser.raw=b'\x00\x01\x02'
         self.assertEqual(parser.getShort(), 0)
         self.assertEqual(parser.getShort(), 1)
         self.assertEqual(parser.getShort(), 2)
         self.assertEqual(parser.getShort(), None)
 
     def test_getInt(self):
-        by = b'\x00\x01\x02\x03\x04\x05\x06'
         parser=TLSHelloParser()
-        parser.raw=by
+        parser.raw=b'\x00\x01\x02\x03\x04\x05\x06'
         self.assertEqual(parser.getInt(), 0x01)
         self.assertEqual(parser.getInt(), 0x0203)
         self.assertEqual(parser.getInt(), 0x0405)
         self.assertEqual(parser.getInt(), None)
 
     def test_getRaw(self):
-        by = b'\x00\x01\x02\x03\x04\x05\x06'
         parser=TLSHelloParser()
-        parser.raw=by
+        parser.raw=b'\x00\x01\x02\x03\x04\x05\x06'
         self.assertEqual(parser.getRaw(1), b'\x00')
         self.assertEqual(parser.getRaw(2), b'\x01\x02')
         self.assertEqual(parser.getRaw(3), b'\x03\x04\x05')
