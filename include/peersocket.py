@@ -111,7 +111,7 @@ class PeerSocket(threading.Thread):
             "User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0\r\n" \
             "Proxy-Connection: keep-alive\r\n" \
             "Connection: keep-alive\r\n" \
-            "Proxy-Authorization: Basic {2}==\r\n" \
+            "Proxy-Authorization: Basic {2}\r\n" \
             "Host: {0}:{1}\r\n".format(self.host_target, self.port_target, cred)
             head+="\r\n"
             try:
