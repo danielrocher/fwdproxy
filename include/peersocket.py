@@ -85,6 +85,8 @@ class PeerSocket(threading.Thread):
 
         if self.proxy:
             cred, self.host, self.port=self.getCredAndProxyAddressPort(self.proxy)
+        else:
+            self.host, self.port=self.peer
 
         self.host_target, self.port_target=self.peer
         PeerSocket.lock.acquire()
